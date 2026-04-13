@@ -9,15 +9,18 @@ import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * CONSUMER 1 — Inventory Service
- *
+ * <p>
  * Listens to orders.placed and deducts stock for the ordered product.
- *
+ * <p>
  * Key concepts demonstrated:
  * - @KafkaListener with a dedicated groupId ("inventory-group")
- *   This means this consumer gets its own independent offset pointer —
- *   it does NOT share consumption with the email or audit consumers.
+ * This means this consumer gets its own independent offset pointer —
+ * it does NOT share consumption with the email or audit consumers.
  * - @RetryableTopic for automatic retry with backoff before hitting the DLQ.
  */
 @Slf4j
@@ -25,8 +28,8 @@ import org.springframework.stereotype.Service;
 public class InventoryConsumer {
 
     // In-memory inventory — simulates a real stock database
-    private final java.util.concurrent.ConcurrentHashMap<String, Integer> inventory =
-            new java.util.concurrent.ConcurrentHashMap<>() {{
+    private final ConcurrentHashMap<String, Integer> inventory =
+            new ConcurrentHashMap<>() {{
                 put("PROD-001", 100);
                 put("PROD-002", 50);
                 put("PROD-003", 200);
@@ -76,6 +79,6 @@ public class InventoryConsumer {
 
     // Expose inventory for the REST status endpoint
     public java.util.Map<String, Integer> getInventory() {
-        return java.util.Collections.unmodifiableMap(inventory);
+        return Collections.unmodifiableMap(inventory);
     }
 }
